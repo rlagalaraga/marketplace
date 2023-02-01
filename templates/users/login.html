@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <br>
+    <div class="container w-25">
+      <small id="valError" class="errMsg"></small>
+        <div class="card border-primary mb-3">
+            <div class="card-header"><h3>Login</h3></div>
+            <div class="card-body">
+
+              <form id="loginUser" action="" class="was-validated" novalidate>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="exampleInputEmail1" class="form-label mt-4">Email address</label>
+                    <input type="email" class="form-control" id="exampleInputEmail1" name="email" aria-describedby="emailHelp" placeholder="Enter email" required>
+                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputPassword1" class="form-label mt-4">Password</label>
+                    <input type="password" class="form-control" id="exampleInputPassword1" name="password" placeholder="Password" required>
+                  </div>
+                  <br>
+                  <button type="submit" class="btn btn-primary">Login</button>
+              </form>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+<script type="text/javascript" src="{% static 'js/user.js' %}"></script>
+{% endblock %}

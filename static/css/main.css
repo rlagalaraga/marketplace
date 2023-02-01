@@ -1,0 +1,8 @@
+.errMsg{
+    color: red;
+    display: none;
+}
+
+.avatarDisp{
+    border-radius: 70px;
+}

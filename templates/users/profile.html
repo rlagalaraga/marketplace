@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+    <br>
+    <section class="h-100 gradient-custom-2">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-lg-9 col-xl-7">
+
+                <div class="card" id="profileCard">
+
+                    <div class="rounded-top text-white d-flex flex-row" style="background-color: #000000; height:250px;">
+                        <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px;">
+                            <br>
+                            <img src="" class="avatarDisp" id="avatarDisp">
+                        </div>
+
+                        <div class="ms-3" style="margin-top: 110px;">
+                          <h5 id="nameView"></h5>
+                          <small id="emailView"></small>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+{% block extra_js %}
+
+    {% if user.is_authenticated %}
+
+    <script>
+        $(document).ready(function(){
+
+            $.ajax({
+                type: "GET",
+                url: "{% url 'users:profile' user.id %}",
+                success: function(data){
+                    $("#nameView").append(data.first_name + " " + data.last_name);
+                    $("#emailView").append(data.email);
+                    $("#profileCard").append("<a href='{% url 'users:update-profile-page' %}' class='btn btn-outline-dark' data-mdb-ripple-color='dark' style='z-index: 1;'>Edit profile</a>");
+                    if(data.avatar !== null){
+                        $("#avatarDisp").attr('src', data.avatar);
+                    }
+                    else{
+                       $("#avatarDisp").attr('src', '{% get_media_prefix %}defaultAvatar.png');
+                    }
+                },
+            })
+        })
+    </script>
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<br>
+<div class="container w-25">
+    <small id="valError" class="errMsg"></small>
+    <div class="card border-primary mb-3">
+        <div class="card-header"><h3>Edit</h3></div>
+        <div class="card-body">
+
+          <form id="editUser" action="" class="was-validated" novalidate>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="exampleInputEmail1" class="form-label mt-4">Firstname</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="Firstname" required>
+                <small id="fnameError" class="errMsg"></small>
+              </div>
+              <div class="form-group">
+                <label for="exampleInputPassword1" class="form-label mt-4">Lastname</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Lastname" required>
+                <small id="lnameError" class="errMsg"></small>
+              </div>
+              <div class="form-group">
+                <label for="formFile" class="form-label mt-4">Avatar</label>
+                <input class="form-control" type="file" id="avatar" name="avatar" accept="image/*">
+                <small id="imgError" class="errMsg"></small>
+              </div>
+              <br>
+              <button type="submit" class="btn btn-primary">Edit</button>
+          </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+
+    <script>
+
+        // JavaScript function to get cookie by name
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        //get user
+         $(document).ready(function(){
+
+            $.ajax({
+                type: "GET",
+                url: "{% url 'users:profile' user.id %}",
+                success: function(data){
+                    $('#first_name').val(data.first_name)
+                    $('#last_name').val(data.last_name)
+                    $("#nameView").append(data.first_name + " " + data.last_name);
+                    $("#emailView").append(data.email);
+                    if(data.avatar !== null){
+                        $("#avatarDisp").attr('src', data.avatar);
+                    }
+                    else{
+                       $("#avatarDisp").attr('src', '{% get_media_prefix %}defaultAvatar.png');
+                    }
+                },
+            })
+        })
+
+        //edit user
+        let namelvalCheck = false
+
+        $("form#editUser").submit(function(event){
+            event.preventDefault()
+            var formData = new FormData()
+
+            var fname = $("#first_name").val()
+            var lname = $("#last_name").val()
+
+            if(fname && lname){
+                if($('#avatar').prop('files')[0] != undefined){
+                    formData.append('avatar', $('#avatar')[0].files[0])
+                }
+                valNames(fname, lname)
+                formData.append('first_name', fname)
+                formData.append('last_name', lname)
+
+                if(namelvalCheck === true){
+                    $.ajax({
+                        type:"PUT",
+                        url:"{% url 'users:profile' user.id %}",
+                        data:formData,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function(xhr){
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        },
+                        success:function(){
+                            window.location.href = "{% url 'users:profile-page' %}"
+                        },
+                        error:function(error){
+                            console.log(error)
+                            $('#imgError').show()
+                            $("#imgError").html("Don't be stupid this ain't an image file")
+                        }
+                    })
+                }
+
+            }
+            else{
+                $('#valError').show()
+                $("#valError").html("All fields must have valid input")
+            }
+        })
+
+        //Validates names
+        function valNames(fn,ln){
+            let regex = /^[a-z ,.'-]+$/i
+            if(fn.length>80){
+                $('#fnameError').show()
+                $("#fnameError").html("First Name exceeds max length please try again")
+                namelvalCheck = false
+                return false
+            }
+            if(ln.length>80){
+                $('#lnameError').show()
+                $("#lnameError").html("Last Name exceeds max length please try again")
+                namelvalCheck = false
+                return false
+            }
+            if(!regex.test(fn)){
+                $('#fnameError').show()
+                $("#fnameError").html("Invalid First Name please try again ")
+                namelvalCheck = false
+                return false
+            }
+            if(!regex.test(ln)){
+                $('#lnameError').show()
+                $("#lnameError").html("Invalid Last Name please try again ")
+                namelvalCheck = false
+                return false
+            }
+            $('#fnameError').hide()
+            $('#lnameError').hide()
+            namelvalCheck = true
+            return true
+        
+
+        }
+
+    </script>
+
+{% endblock %}
