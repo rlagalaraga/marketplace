@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Product Container -->
+<div class="container">
+</div>
+
+<!-- Form Modal -->    
+<div class="modal" id="formModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Product</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+        <form id="updateProduct" action="" novalidate class="was-validated">
+        {% csrf_token %}
+        <div class="modal-body">
+
+                <div class="form-group">
+                    <label for="exampleInputEmail1" class="form-label mt-4">Product Name</label>
+                    <input type="text" class="form-control" name="prodName" aria-describedby="emailHelp" placeholder="Enter name" required>
+                    <small id="nameError" class="errMsg"></small>
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword1" class="form-label mt-4">Status</label>
+                    <select class="form-select" name="status" id="status">
+                        <option value=1>Available</option>
+                        <option value=2>Out of stock</option>
+                      </select>
+                    <small id="fnameError" class="errMsg"></small>
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputPassword1" class="form-label mt-4">Category</label>
+                    <select class="form-select" name="category" id="category">
+                        <option value=1>Normies</option>
+                        <option value=2>Dark</option>
+                        <option value=3>Others</option>
+                      </select>
+                    <small id="lnameError" class="errMsg"></small>
+                </div>
+                <div class="form-group">
+                    <label for="formFile" class="form-label mt-4">Product Image</label>
+                    <input class="form-control" type="file" id="prodImg" name="prodImg" accept="image/*">
+                    <small id="imgError" class="errMsg"></small>
+                </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary" id="frmBtn" data-bs-dismiss="modal">Update</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+// JavaScript function to get cookie by name
+ function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+var pathname = window.location.pathname;
+const prodID = pathname.split('/')[2]
+
+    //get product
+    $(document).ready(function(){
+
+        let temp = ""
+        $.ajax({
+            type: "GET",
+            url: "product-detail/" + prodID + "/",
+            success:function(data){
+                var prodOwner = data.owner.split('/')[0]
+                var current_user = "{{user.first_name}} {{user.last_name}}" 
+                $('input[name="prodName"]').val(data.product_name)
+                temp += "<div class='card mb-3'>"
+                temp += "<h5 class='card-header'>" + prodOwner + "</h5>"
+                temp += "<div class='card-body'>"
+                temp += "<h3 class='card-title'>" + data.product_name + "</h3></div>"
+
+                if(data.prod_pic){
+                    temp += "<center><img src='"+ data.prod_pic +"' id='prodPicDetail'></img></center>"
+                }
+                else{
+                    temp += "<center><img src='{% get_media_prefix %}defaultProdPic.png' id='prodPicDetail'></img></center>"
+                }
+
+                temp += "<div class='card-body'>"
+
+                if(data.status === 1){
+                    temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + data.status_name + "</p>"
+                }
+                else if(data.status === 2){
+                    temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + data.status_name + "</p>"
+                }
+                
+                temp += "<p><strong>Category: </strong>" + data.category_name + "</p>"
+                temp += "<div class='card-footer text-muted'>"
+                if(current_user === prodOwner){
+                    temp += "<a href='' class='btn btn-outline-primary' data-bs-toggle='modal' data-bs-target='#formModal' style='margin-right: 5px;'>Edit</a>"
+                    temp += "<button class='btn btn-outline-danger' id='delete' style='margin-right: 5px;'>Delete</button>"
+                }
+                else{
+                    if(data.status === 1){
+                        temp += "<a href='' class='btn btn-outline-dark' style='margin-right: 5px;'>Add to cart</a>"
+                    }
+                    temp += "<a href='' class='btn btn-outline-warning' style='margin-right: 5px;'>Wishlist</a>"
+                }
+                temp += "</div></div>"
+                $(".container").append(temp);
+            }
+        })
+    })
+
+    //Delete product
+    $(document).on("click", "#delete", function(){
+        $.ajax({
+            type: "POST",
+            url: "product-detail/" + prodID + "/",
+            beforeSend: function(xhr){
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success:function(){
+                alert("Deleted");
+                window.location.href = "dashboard/"
+            }
+        })
+    }); 
+
+    //Update product
+    $("form#updateProduct").submit(function(event){
+        event.preventDefault()
+        var formData = new FormData()
+        var name = $('input[name="prodName"]').val()
+        var status = $('#status').val()
+        var category = $('#category').val()
+
+        if($('#prodImg').prop('files')[0] != undefined){
+            formData.append('prod_pic', $('#prodImg')[0].files[0])
+        }
+        formData.append('product_name', name)
+        formData.append('status', status)
+        formData.append('category', category)
+
+        let temp =""
+
+        $.ajax({
+            type: "PUT",
+            url: "product-detail/" + prodID + "/",
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success:function(){
+                alert("Updated")
+                location.reload(true);
+            },
+            error:function(error){
+                console.log(error)
+                $('#nameError').show()
+                $("#nameError").html("Product name required")
+            }
+        })
+    })
+</script>
+{% endblock %}

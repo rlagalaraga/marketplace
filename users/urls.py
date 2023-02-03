@@ -4,8 +4,7 @@ from users import views, api
 app_name = 'users'
 
 urlpatterns = [
-    path("", views.DashboardView.as_view(), name="dashboard"),
-    path("profile-page/", views.ProfileView.as_view(), name="profile-page"),
+    path("profile-page/<int:id>/", views.ProfileView.as_view(), name="profile-page"),
     path("register-page/", views.RegisterView.as_view(), name="register-page"),
     path("login-page/", views.LoginView.as_view(), name="login-page"),
     path("update-profile-page/", views.UpdateView.as_view(), name="update-profile-page"),

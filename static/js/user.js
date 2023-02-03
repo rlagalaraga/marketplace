@@ -153,7 +153,7 @@ $("form#loginUser").submit(function(event){
             },
             success:function(){
                 alert("Successfully Logged In")
-                window.location.href = "users/"
+                window.location.href = "dashboard/"
             },
             error:function(error){
                 console.log(error.status)

@@ -8,6 +8,8 @@
     <div class="card border-primary mb-3">
         <div class="card-header"><h3>Edit</h3></div>
         <div class="card-body">
+            
+        {% if user.is_authenticated %}
 
           <form id="editUser" action="" class="was-validated" novalidate>
             {% csrf_token %}
@@ -30,12 +32,19 @@
               <button type="submit" class="btn btn-primary">Edit</button>
           </form>
 
+          {% else %}
+
+          <a href='{% url 'users:login-page' %}' class='btn btn-outline-dark' data-mdb-ripple-color='dark' style='z-index: 1;'>Login</a>
+          
+          {% endif %}
+          
         </div>
     </div>
 </div>
 {% endblock %}
 {% block extra_js %}
 
+    {% if user.is_authenticated %}
     <script>
 
         // JavaScript function to get cookie by name
@@ -106,7 +115,7 @@
                             xhr.setRequestHeader("X-CSRFToken", csrftoken);
                         },
                         success:function(){
-                            window.location.href = "{% url 'users:profile-page' %}"
+                            window.location.href = "{% url 'users:profile-page' user.id %}"
                         },
                         error:function(error){
                             console.log(error)
@@ -159,5 +168,7 @@
         }
 
     </script>
+
+    {% endif %}
 
 {% endblock %}

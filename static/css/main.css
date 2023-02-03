@@ -6,3 +6,13 @@
 .avatarDisp{
     border-radius: 70px;
 }
+
+#prodPic{
+    height: 300px;
+    width: 300px;
+}
+
+#prodPicDetail{
+    height: 600px;
+    width: 600px;
+}

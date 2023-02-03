@@ -19,7 +19,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     avatar = models.ImageField(blank=True, null=True, upload_to='profile_images', default='defaultAvatar.png')
     date_joined = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-    following = models.ManyToManyField("self", related_name="followers", symmetrical=False)
 
     USERNAME_FIELD = "email"
     objects = UserManager()

@@ -4,12 +4,6 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 # Create your views here.
 
-class DashboardView(TemplateView):
-    template_name = "base.html"
-
-    def get(self, *args, **kwargs):
-        return render(self.request, "base.html")
-
 
 class RegisterView(TemplateView):
     template_name = "users/register.html"
@@ -43,5 +37,5 @@ def LogoutView(request):
 
     logout(request)
     messages.success(request, 'Account Logged Out!')
-    return redirect('users:dashboard')
+    return redirect('market:dashboard')
 

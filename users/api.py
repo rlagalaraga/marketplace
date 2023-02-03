@@ -5,9 +5,10 @@ from .models import User
 from users import serializers
 from django.contrib.auth import login, logout, authenticate
 from rest_framework import permissions
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.hashers import make_password
 from users import custom_permissions
+from django.contrib import messages
 
 class RegisterViewSet(ViewSet):
     permission_classes = (permissions.AllowAny,)
@@ -62,3 +63,9 @@ class UserViewSet(ViewSet):
             serializer.save()
             return Response(serializer.data, status=200)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def LogoutView(request):
+
+        logout(request)
+        messages.success(request, 'Account Logged Out!')
+        return redirect('users:dashboard')

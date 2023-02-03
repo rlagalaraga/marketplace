@@ -29,18 +29,21 @@
 {% endblock %}
 {% block extra_js %}
 
-    {% if user.is_authenticated %}
-
     <script>
+        var pathname = window.location.pathname;
+        var userID = pathname.split('/')[3]
         $(document).ready(function(){
 
             $.ajax({
                 type: "GET",
-                url: "{% url 'users:profile' user.id %}",
+                url: "users/profile/" + userID +"/",
                 success: function(data){
                     $("#nameView").append(data.first_name + " " + data.last_name);
                     $("#emailView").append(data.email);
-                    $("#profileCard").append("<a href='{% url 'users:update-profile-page' %}' class='btn btn-outline-dark' data-mdb-ripple-color='dark' style='z-index: 1;'>Edit profile</a>");
+                    if(data.email === "{{user.email}}"){
+                        $("#profileCard").append("<a href='{% url 'users:update-profile-page' %}' class='btn btn-outline-dark' data-mdb-ripple-color='dark' style='z-index: 1;'>Edit profile</a>");
+                    }
+
                     if(data.avatar !== null){
                         $("#avatarDisp").attr('src', data.avatar);
                     }
@@ -51,6 +54,5 @@
             })
         })
     </script>
-    {% endif %}
 
 {% endblock %}
