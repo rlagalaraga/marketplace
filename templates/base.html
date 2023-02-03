@@ -32,18 +32,21 @@
             <li class="nav-item">
             </li>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Category</a>
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Transaction</a>
               <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">--filter--</a>
-                <a class="dropdown-item" href="#">--filter--</a>
-                <a class="dropdown-item" href="#">--filter--</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">Separated link</a>
+                <a class="dropdown-item" href="{% url 'transaction:buyer' %}">Bought</a>
+                <a class="dropdown-item" href="{% url 'transaction:seller' %}">Sold</a>
               </div>
             </li>
             {% if user.is_authenticated %}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'users:profile-page' user.id %}">Profile</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'cart:cart-page' %}">Cart</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'market:wishlist-page' %}">Wishlist</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
@@ -58,8 +61,9 @@
             {% endif %}
           </ul>
           <form class="d-flex">
-            <input class="form-control me-sm-2" type="search" placeholder="Search">
-            <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+            {% if user.is_authenticated %}
+            <h5 style="color: white;">{{user}}</h5>
+            {% endif %}
           </form>
         </div>
       </div>

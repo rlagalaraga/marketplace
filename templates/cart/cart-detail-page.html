@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Product Container -->
+<div class="container">
+</div>
+
+{% endblock %}
+{% block extra_js %}
+
+<script>
+    // JavaScript function to get cookie by name
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    var pathname = window.location.pathname;
+    const cartID = pathname.split('/')[3]
+
+    //get product in cart
+    $(document).ready(function(){
+        
+        let temp = ""
+
+        $.ajax({
+            type: 'GET',
+            url : "cart/cart-detail-api/" + cartID + "/",
+            success : function(data){
+                console.log(data)
+
+                let temp = ""
+
+                $.ajax({
+                    type: "GET",
+                    url: "product-detail/" + data.product + "/",
+                    success:function(prod){
+                        if(prod){
+                            var prodOwner = prod.data.owner.split('/')[0]
+                            var ownerID = prod.data.owner.split('/')[1]
+                            console.log("{{user.id}}")
+                            console.log(data.added_by.toString())
+                            temp += "<div class='card mb-3'>"
+                            temp += "<h5 class='card-header'> Seller:<a href='users/profile-page/" + ownerID + "/'>" + prodOwner + "</h5></a>"
+                            temp += "<div class='card-body'>"
+                            temp += "<h3 class='card-title'>" + prod.data.product_name + "</h3></div>"
+
+                            if(prod.data.prod_pic){
+                                temp += "<center><img src='" + prod.data.prod_pic + "' id='prodPicDetail'></img></center>"
+                            }
+                            else{
+                                temp += "<center><img src='{% get_media_prefix %}defaultProdPic.png' id='prodPicDetail'></img></center>"
+                            }
+
+                            temp += "<div class='card-body'>"
+                            temp += "<p><strong style='color:grey;'>Date Added: </strong>" + data.date_added.split('T')[0] + "</p>"
+                            temp += "<p><strong style='color:grey;'>Qty: </strong>" + data.quantity + "</p>"
+
+                            if(prod.data.status === 1){
+                                temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + prod.data.status_name + "</p>"
+                            }
+                            else if(prod.data.status === 2){
+                                temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + prod.data.status_name + "</p>"
+                            }
+                            
+                            temp += "<p><strong>Category: </strong>" + prod.data.category_name + "</p>"
+                            temp += "<div class='card-footer text-muted'>"
+
+                            if("{{user.id}}" === data.added_by.toString()){
+                                temp += "<button class='btn btn-outline-primary' id='checkOut' style='margin-right: 5px;'>Check out</button>"
+                                temp += "<button class='btn btn-outline-danger' id='delete' style='margin-right: 5px;'>Remove</button>"
+                            }
+                            temp += "</div></div>"
+                            $(".container").append(temp);
+                        }
+
+                        //Check Out product
+                        $(document).on("click", "#checkOut", function(){
+                            console.log(prod.prod_pic)
+                            $.ajax({
+                                type: "POST",
+                                url: "transaction/transact/",
+                                data:{
+                                    'product_name': prod.data.product_name,
+                                    'seller': parseInt(ownerID),
+                                    'buyer': parseInt("{{user.id}}"),
+                                    'prod_pic': prod.data.prod_pic,
+                                    'quantity': data.quantity
+                                },
+                                beforeSend: function(xhr){
+                                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                },
+                                success:function(){
+                                    alert("Product Purchased");
+
+                                    //Remove product from cart after purchase
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "cart/cart-detail-api/" + cartID + "/",
+                                        beforeSend: function(xhr){
+                                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                        },
+                                        success:function(){
+                                            window.location.href = "transaction/buyer/"
+                                        }
+                                    })
+
+                                }
+                            })
+                        }); 
+                    }
+                })
+            } 
+        })
+    })
+
+    //Delete product
+    $(document).on("click", "#delete", function(){
+        $.ajax({
+            type: "POST",
+            url: "cart/cart-detail-api/" + cartID + "/",
+            beforeSend: function(xhr){
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success:function(){
+                alert("Deleted");
+                window.location.href = "dashboard/"
+            }
+        })
+    }); 
+    
+</script>
+
+{% endblock %}

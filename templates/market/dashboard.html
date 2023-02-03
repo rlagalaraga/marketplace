@@ -80,6 +80,7 @@
    
 {% endblock %}
 
+<!--Scripts-->
 
 {% block extra_js %}
 <script type="text/javascript" src="{% static 'js/market.js' %}" ></script>
@@ -102,7 +103,6 @@
     return cookieValue;
 }
 const csrftoken = getCookie('csrftoken');
-
 
 //Post a product
 
@@ -133,31 +133,34 @@ $("form#addProduct").submit(function(event){
             xhr.setRequestHeader("X-CSRFToken", csrftoken);
         },
         success:function(){
-            temp += "<div class='col-4'>"
-            temp += "<div class='card border-primary mb-3' style='max-width: 20rem;'>"
-            temp += "<div class='card-header'>{{ request.user.first_name }} {{ request.user.last_name }}</div>"
-            temp += "<div class='card-body'>"
-            temp += "<h4 class='card-title'>" + name +"</h4>"
+            alert("Product Added")
+            location.reload(true);
 
-            if($('#prodImg').prop('files')[0] != undefined){
-                temp += "<img src='" + URL.createObjectURL($('#prodImg').prop('files')[0]) + "' class='img-fluid' id='prodPic'></img>"
-            }
+            // temp += "<div class='col-4'>"
+            // temp += "<div class='card border-primary mb-3' style='max-width: 20rem;'>"
+            // temp += "<div class='card-header'>{{ request.user.first_name }} {{ request.user.last_name }}</div>"
+            // temp += "<div class='card-body'>"
+            // temp += "<h4 class='card-title'>" + name +"</h4>"
+
+            // if($('#prodImg').prop('files')[0] != undefined){
+            //     temp += "<img src='" + URL.createObjectURL($('#prodImg').prop('files')[0]) + "' class='img-fluid' id='prodPic'></img>"
+            // }
             
-            else{
-                temp += "<img src='{% get_media_prefix %}defaultProdPic.png' id='prodPic'></img>"
-            }
+            // else{
+            //     temp += "<img src='{% get_media_prefix %}defaultProdPic.png' id='prodPic'></img>"
+            // }
 
-            temp += "<a href='#' class='card-link'>Product seller details</a>"
-            if($("#status").val() == 1){
-                temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + $("#status option:selected").text() + "</p>"
-            }
-            else if($("#status").val() == 2){
-                temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + $("#status option:selected").text() + "</p>"
-            }
-            temp += "<p><strong>Status: </strong>" + $("#category option:selected").text() + "</p>"
-            temp += "</div><div class='card-footer'>"
-            temp += "<a href='{% url 'market:productDetail' id=4 %}' class='btn btn-outline-dark' data-mdb-ripple-color='dark' style='z-index: 1;'>Details</a></div></div></div>"
-            $("#prodContainer").append(temp);
+            // temp += "<a href='#' class='card-link'>Product seller details</a>"
+            // if($("#status").val() == 1){
+            //     temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + $("#status option:selected").text() + "</p>"
+            // }
+            // else if($("#status").val() == 2){
+            //     temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + $("#status option:selected").text() + "</p>"
+            // }
+            // temp += "<p><strong>Status: </strong>" + $("#category option:selected").text() + "</p>"
+            // temp += "</div><div class='card-footer'>"
+            // temp += "<a href='/product-view/" + product.id + "/' class='btn btn-outline-dark' data-mdb-ripple-color='dark' style='z-index: 1;'>Details</a></div></div></div>"
+            // $("#prodContainer").append(temp);
         },
         error:function(error){
             console.log(error)

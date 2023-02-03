@@ -7,7 +7,7 @@
 <div class="container">
 </div>
 
-<!-- Form Modal -->    
+<!-- Form Modal update -->    
 <div class="modal" id="formModal">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -60,6 +60,38 @@
     </div>
   </div>
 
+  <!-- Form Modal Add to cart -->    
+ <div class="modal" id="formModalAdd">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add to cart</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+        <form id="addToCart" action="" novalidate class="was-validated">
+        {% csrf_token %}
+        <div class="modal-body">
+
+                <div class="form-group">
+                    <label for="exampleInputEmail1" class="form-label mt-4">Quantity</label>
+                    <input type="number" min="1" class="form-control" id="quantity" required>
+                    <small id="qtyError" class="errMsg"></small>
+                </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary" id="frmBtn" data-bs-dismiss="modal">Add</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+
 {% endblock %}
 
 {% block extra_js %}
@@ -94,16 +126,21 @@ const prodID = pathname.split('/')[2]
             type: "GET",
             url: "product-detail/" + prodID + "/",
             success:function(data){
-                var prodOwner = data.owner.split('/')[0]
+                var prodOwner = data.data.owner.split('/')[0]
+                var ownerID = data.data.owner.split('/')[1]
                 var current_user = "{{user.first_name}} {{user.last_name}}" 
-                $('input[name="prodName"]').val(data.product_name)
-                temp += "<div class='card mb-3'>"
-                temp += "<h5 class='card-header'>" + prodOwner + "</h5>"
-                temp += "<div class='card-body'>"
-                temp += "<h3 class='card-title'>" + data.product_name + "</h3></div>"
+                var wish = data.wishlisted
+                $('input[name="prodName"]').val(data.data.product_name)
+                $('#status').val(data.data.status)
+                $('#category').val(data.data.category)
 
-                if(data.prod_pic){
-                    temp += "<center><img src='"+ data.prod_pic +"' id='prodPicDetail'></img></center>"
+                temp += "<div class='card mb-3'>"
+                temp += "<h5 class='card-header'> Seller:<a href='users/profile-page/" + ownerID + "/'>" + prodOwner + "</h5></a>"
+                temp += "<div class='card-body'>"
+                temp += "<h3 class='card-title'>" + data.data.product_name + "</h3></div>"
+
+                if(data.data.prod_pic){
+                    temp += "<center><img src='"+ data.data.prod_pic +"' id='prodPicDetail'></img></center>"
                 }
                 else{
                     temp += "<center><img src='{% get_media_prefix %}defaultProdPic.png' id='prodPicDetail'></img></center>"
@@ -111,30 +148,51 @@ const prodID = pathname.split('/')[2]
 
                 temp += "<div class='card-body'>"
 
-                if(data.status === 1){
-                    temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + data.status_name + "</p>"
+                if(data.data.status === 1){
+                    temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + data.data.status_name + "</p>"
                 }
-                else if(data.status === 2){
-                    temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + data.status_name + "</p>"
+                else if(data.data.status === 2){
+                    temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + data.data.status_name + "</p>"
                 }
                 
-                temp += "<p><strong>Category: </strong>" + data.category_name + "</p>"
+                temp += "<p><strong>Category: </strong>" + data.data.category_name + "</p>"
                 temp += "<div class='card-footer text-muted'>"
                 if(current_user === prodOwner){
                     temp += "<a href='' class='btn btn-outline-primary' data-bs-toggle='modal' data-bs-target='#formModal' style='margin-right: 5px;'>Edit</a>"
                     temp += "<button class='btn btn-outline-danger' id='delete' style='margin-right: 5px;'>Delete</button>"
                 }
                 else{
-                    if(data.status === 1){
-                        temp += "<a href='' class='btn btn-outline-dark' style='margin-right: 5px;'>Add to cart</a>"
+                    if(data.data.status === 1){
+                        temp += "<button class='btn btn-outline-dark' data-bs-toggle='modal' data-bs-target='#formModalAdd' style='margin-right: 5px;'>Add to cart</button>"
                     }
-                    temp += "<a href='' class='btn btn-outline-warning' style='margin-right: 5px;'>Wishlist</a>"
+
+                    if(wish == true){
+                        temp += "<button id='wishlistBtn' class='btn btn-outline-warning' style='margin-right: 5px;'>Remove Wishlist</button>"
+                    }
+                    else{
+                        temp += "<button id='wishlistBtn' class='btn btn-outline-warning' style='margin-right: 5px;'>Wishlist</button>"
+                    }
                 }
                 temp += "</div></div>"
                 $(".container").append(temp);
             }
         })
     })
+
+    //Wishlist product
+    $(document).on("click", "#wishlistBtn", function(){
+        $.ajax({
+            type: "POST",
+            url: "product-wishlist/" + prodID + "/",
+            beforeSend: function(xhr){
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success:function(){
+                alert("added to wishlist");
+                window.location.href = "dashboard/"
+            }
+        })
+    });
 
     //Delete product
     $(document).on("click", "#delete", function(){
@@ -188,5 +246,32 @@ const prodID = pathname.split('/')[2]
             }
         })
     })
+
+    //Add to cart
+    $("form#addToCart").submit(function(event){
+        event.preventDefault()
+        var qty = $("#quantity").val();
+
+        $.ajax({
+            type:'POST',
+            url: "cart/cartAPI/",
+            data:{
+                'product': parseInt(prodID),
+                'quantity': qty
+            },
+            beforeSend: function(xhr){
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success:function(){
+                alert("added to cart")
+            },
+            error:function(error){
+                console.log(error)
+                $('#qtyError').show()
+                $("#qtyError").html("Requires quantity greater than 1")
+            }
+        })
+    })
+
 </script>
 {% endblock %}

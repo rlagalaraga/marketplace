@@ -7,6 +7,7 @@ urlpatterns = [
 
     path('dashboard/', views.DashboardView.as_view(), name="dashboard"),
     path('product-view/<int:id>/', views.DetailView.as_view(), name="productDetail"),
+    path('wishlist-page/', views.WishlistView.as_view(), name="wishlist-page"),
 
     path('list/', api.ProductViewSet.as_view({
         'get': 'get_all',
@@ -22,4 +23,8 @@ urlpatterns = [
         'put': 'put',
         'post': 'delete'
     }), name="product-detail"),
+
+    path('product-wishlist/<int:id>/', api.ProductViewSet.as_view({
+        'post': 'wishlist_product'
+    }), name="product-wishlist")
 ]

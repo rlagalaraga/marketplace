@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <header class="py-5 bg-dark border-bottom mb-4">
+        <div class="container">
+            <div class="text-center my-5">
+                <h4 style="color: white;">My Cart</h4>
+            </div>
+        </div>
+    </header>
+
+    <br>
+
+<!-- Product Container -->
+    <div class="container">
+        <div class="row justify-content-center" id="prodContainer">
+    
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        $(document).ready(function(){
+
+            //get cart
+            $.ajax({
+                type:"GET",
+                url:"/cart/cartAPI/",
+                success: function(data){
+                    $.each(data, function(i,cart){
+
+                        if(cart.added_by == "{{request.user.id}}"){
+
+                            //get cart products
+                            let temp = ""
+                            $.ajax({
+                                type: "GET",
+                                url: "product-detail/" + cart.product + "/",
+                                success:function(product){
+
+                                    var prodOwner = product.data.owner.split('/')[0]
+                                    var ownerID = product.data.owner.split('/')[1]
+
+                                    console.log(product.data.product_name)
+                                    temp += "<div class='col-4'>"
+                                    temp += "<div class='card mb-3'>"
+                                    temp += "<h5 class='card-header'> Seller:<a href='users/profile-page/" + ownerID + "/'>" + prodOwner + "</h5></a>"
+                                    temp += "<div class='card-body'>"
+                                    temp += "<h3 class='card-title'>" + product.data.product_name + "</h3></div>"
+
+                                    if(product.data.prod_pic){
+                                        temp += "<center><img src='"+ product.data.prod_pic +"' id='prodPic'></img></center>"
+                                    }
+                                    else{
+                                        temp += "<center><img src='{% get_media_prefix %}defaultProdPic.png' id='prodPic'></img></center>"
+                                    }
+
+                                    temp += "<div class='card-body'>"
+                                    temp += "<p><strong style='color:grey;'>Qty: </strong>" + cart.quantity + "</p>"
+
+                                    if(product.status === 1){
+                                        temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + product.data.status_name + "</p>"
+                                    }
+                                    else if(product.status === 2){
+                                        temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + product.data.status_name + "</p>"
+                                    }
+                                    
+                                    temp += "<p><strong>Category: </strong>" + product.data.category_name + "</p>"
+                                    temp += "<div class='card-footer text-muted'>"
+                                    if(product.data.status === 1){
+                                        temp += "<a href='/cart/cart-detail/" + cart.id + "' class='btn btn-outline-dark' style='margin-right: 5px;'>Details</a>"
+                                    }
+
+                                    temp += "</div></div></div>"
+                                    $("#prodContainer").append(temp);
+                                }
+                            })
+
+                        }
+
+                    })
+                }
+            })
+
+
+        })
+
+    </script>
+{% endblock %}

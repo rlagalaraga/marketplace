@@ -14,3 +14,10 @@ class DetailView(TemplateView):
 
     def get(self, *args, **kwargs):
         return render(self.request, "market/product-detail.html")
+
+
+class WishlistView(TemplateView):
+    template_name = "market/wishlist-page.html"
+
+    def get(self, *args, **kwargs):
+        return render(self.request, "market/wishlist-page.html")

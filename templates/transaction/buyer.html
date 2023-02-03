@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <header class="py-5 bg-dark border-bottom mb-4">
+        <div class="container">
+            <div class="text-center my-5">
+                {% if user.is_authenticated %}
+                <h4 style="color: white;">Bought products</h4>
+                {% else %}
+                <p style="color: gainsboro;">You are not logged in. You must log in to add products.</p>
+                <a href="{% url 'users:login-page' %}" style="color: aliceblue;">Log In</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <br>
+
+<!-- Product Container -->
+    <div class="container">
+        <div class="row justify-content-center" id="prodContainer">
+    
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+    $(document).ready(function(){
+        //get purchased products
+        $.ajax({
+            type: 'GET',
+            url: "transaction/transact/",
+            success:function(data){
+
+                $.each(data, function(i, prod){
+                    let temp = ""
+                    //get profile info    
+                    $.ajax({
+                            type: "GET",
+                            url: "users/profile/" + prod.seller +"/",
+                            success: function(profile){
+                                if("{{user.id}}" === prod.buyer.toString()){
+                                    temp += "<div class='col-4'>"
+                                    temp += "<div class='card mb-3'>"
+                                    temp += "<h5 class='card-header'> Seller:<a href='users/profile-page/" + prod.seller + "/'>" + profile.first_name + " " + profile.last_name + "</h5></a>"
+                                    temp += "<div class='card-body'>"
+                                    temp += "<h3 class='card-title'>" + prod.product_name + "</h3></div>"
+
+                                    if(prod.prod_pic){
+                                        temp += "<center><img src='"+ prod.prod_pic +"' id='prodPic'></img></center>"
+                                    }
+                                    else{
+                                        temp += "<center><img src='{% get_media_prefix %}defaultProdPic.png' id='prodPic'></img></center>"
+                                    }
+
+                                    temp += "<div class='card-body'>"
+                                    temp += "<p><strong style='color:grey;'>Date Added: </strong>" + prod.date_added.split('T')[0] + "</p>"
+                                    temp += "<p><strong style='color:grey;'>Qty: </strong>" + prod.quantity + "</p>"
+                                    temp += "<div class='card-footer text-muted'>"
+
+                                    temp += "</div></div></div>"
+                                    $("#prodContainer").append(temp);
+                                }
+                            },
+                        })    
+
+                })
+            }
+        })
+    })
+</script>
+
+{% endblock %}
