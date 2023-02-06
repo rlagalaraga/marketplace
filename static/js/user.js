@@ -49,6 +49,7 @@ $("form#regUser").submit(function(event){
                 },
                 success:function(){
                     alert("Account Registered!")
+                    window.location.href = "dashboard/"
                 },
                 error:function(error){
                     console.log(error.status)

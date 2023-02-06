@@ -11,3 +11,6 @@ class Transaction(models.Model):
     prod_pic = models.TextField(blank=True, null=True, default='defaultProdPic.png')
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     date_added = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.product_name

@@ -82,7 +82,7 @@
 
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary" id="frmBtn" data-bs-dismiss="modal">Add</button>
+          <button type="submit" class="btn btn-primary" id="frmBtn">Add</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
 
@@ -173,6 +173,7 @@ const prodID = pathname.split('/')[2]
                         temp += "<button id='wishlistBtn' class='btn btn-outline-warning' style='margin-right: 5px;'>Wishlist</button>"
                     }
                 }
+
                 temp += "</div></div>"
                 $(".container").append(temp);
             }
@@ -188,11 +189,18 @@ const prodID = pathname.split('/')[2]
             xhr.setRequestHeader("X-CSRFToken", csrftoken);
             },
             success:function(){
-                alert("added to wishlist");
-                window.location.href = "dashboard/"
+                console.log($("#wishlistBtn").text())
+                if($("#wishlistBtn").text() === "Wishlist"){
+                    $("#wishlistBtn").html("Remove Wishlist")
+                }
+                else if($("#wishlistBtn").text() === "Remove Wishlist"){
+                    $("#wishlistBtn").html("Wishlist")
+                }
+
             }
-        })
-    });
+            })
+        });
+
 
     //Delete product
     $(document).on("click", "#delete", function(){
