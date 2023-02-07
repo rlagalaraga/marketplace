@@ -3,7 +3,7 @@ from users.manager import UserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.validators import RegexValidator
 
-letters = RegexValidator(r'^[a-zA-Z]*$', 'Only letters are allowed.')
+letters = RegexValidator(r'^[a-zA-Z. ]*$', 'Only letters are allowed.')
 
 
 # Create your models here.

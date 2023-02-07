@@ -7,12 +7,12 @@
 <div class="container">
 </div>
 
-<!-- Form Modal update -->    
+<!-- Form Modal update -->     
 <div class="modal" id="formModal">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Edit Product</h5>
+          <h5 class="modal-title">Update Product</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
             <span aria-hidden="true"></span>
           </button>
@@ -20,28 +20,28 @@
         <form id="updateProduct" action="" novalidate class="was-validated">
         {% csrf_token %}
         <div class="modal-body">
-
+                <small id="nameError" class="errMsg"></small>
                 <div class="form-group">
                     <label for="exampleInputEmail1" class="form-label mt-4">Product Name</label>
                     <input type="text" class="form-control" name="prodName" aria-describedby="emailHelp" placeholder="Enter name" required>
-                    <small id="nameError" class="errMsg"></small>
                 </div>
                 <div class="form-group">
-                    <label for="exampleInputPassword1" class="form-label mt-4">Status</label>
-                    <select class="form-select" name="status" id="status">
-                        <option value=1>Available</option>
-                        <option value=2>Out of stock</option>
-                      </select>
-                    <small id="fnameError" class="errMsg"></small>
+                    <label class="form-label mt-4">Stock</label>
+                    <input type="number" min="0" class="form-control" id="stock" value=0 required>
+                    <small id="stckError" class="errMsg"></small>
                 </div>
                 <div class="form-group">
-                    <label for="exampleInputPassword1" class="form-label mt-4">Category</label>
+                    <label class="form-label mt-4">Price</label>
+                    <input type="number" onchange="setTwoNumberDecimal" min="0" class="form-control" id="price" value=0 step=".01" required>
+                    <small id="priceError" class="errMsg"></small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label mt-4">Category</label>
                     <select class="form-select" name="category" id="category">
                         <option value=1>Normies</option>
                         <option value=2>Dark</option>
                         <option value=3>Others</option>
                       </select>
-                    <small id="lnameError" class="errMsg"></small>
                 </div>
                 <div class="form-group">
                     <label for="formFile" class="form-label mt-4">Product Image</label>
@@ -51,7 +51,7 @@
 
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary" id="frmBtn" data-bs-dismiss="modal">Update</button>
+          <button type="submit" class="btn btn-primary" id="frmBtn">Update</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
 
@@ -76,7 +76,7 @@
 
                 <div class="form-group">
                     <label for="exampleInputEmail1" class="form-label mt-4">Quantity</label>
-                    <input type="number" min="1" class="form-control" id="quantity" required>
+                    <input type="number" min="1" class="form-control" id="quantity" value= 1 required>
                     <small id="qtyError" class="errMsg"></small>
                 </div>
 
@@ -117,10 +117,10 @@ const csrftoken = getCookie('csrftoken');
 
 var pathname = window.location.pathname;
 const prodID = pathname.split('/')[2]
+var avail_stock
 
     //get product
     $(document).ready(function(){
-
         let temp = ""
         $.ajax({
             type: "GET",
@@ -130,9 +130,11 @@ const prodID = pathname.split('/')[2]
                 var ownerID = data.data.owner.split('/')[1]
                 var current_user = "{{user.first_name}} {{user.last_name}}" 
                 var wish = data.wishlisted
+                avail_stock = data.data.stock
                 $('input[name="prodName"]').val(data.data.product_name)
-                $('#status').val(data.data.status)
                 $('#category').val(data.data.category)
+                $('#stock').val(data.data.stock)
+                $('#price').val(data.data.price)
 
                 temp += "<div class='card mb-3'>"
                 temp += "<h5 class='card-header'> Seller:<a href='users/profile-page/" + ownerID + "/'>" + prodOwner + "</h5></a>"
@@ -147,16 +149,60 @@ const prodID = pathname.split('/')[2]
                 }
 
                 temp += "<div class='card-body'>"
-
-                if(data.data.status === 1){
+                temp += "<p><strong> " + data.data.price + " php</strong></p>"    
+                if(avail_stock > 0){
                     temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + data.data.status_name + "</p>"
+                    temp += "<p id='stckDisp'>Available Stock: " + avail_stock + "</p>"
                 }
-                else if(data.data.status === 2){
+                else if(avail_stock < 1){
                     temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + data.data.status_name + "</p>"
                 }
                 
+                if(avail_stock > 0 && data.data.status == 2){
+                    //update status
+                    $.ajax({
+                        type: "PATCH",
+                        url: "product-detail/" + prodID + "/",
+                        data:{
+                            'status': 1
+                        },
+                        beforeSend: function(xhr){
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        },
+                        success:function(){
+                            console.log("Stock updated")
+                            window.location.href = "cart/cart-page/"
+                        },
+                        error:function(error){
+                            console.log(error)
+                        }
+                    })
+                }
+                else if(avail_stock < 1 && data.data.status == 1){
+                    //update status
+                    $.ajax({
+                        type: "PATCH",
+                        url: "product-detail/" + prodID + "/",
+                        data:{
+                            'status': 2
+                        },
+                        beforeSend: function(xhr){
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        },
+                        success:function(){
+                            console.log("Stock updated")
+                            window.location.href = "cart/cart-page/"
+                        },
+                        error:function(error){
+                            console.log(error)
+                        }
+                    })
+                }
+                
+
                 temp += "<p><strong>Category: </strong>" + data.data.category_name + "</p>"
                 temp += "<div class='card-footer text-muted'>"
+
                 if(current_user === prodOwner){
                     temp += "<a href='' class='btn btn-outline-primary' data-bs-toggle='modal' data-bs-target='#formModal' style='margin-right: 5px;'>Edit</a>"
                     temp += "<button class='btn btn-outline-danger' id='delete' style='margin-right: 5px;'>Delete</button>"
@@ -224,15 +270,22 @@ const prodID = pathname.split('/')[2]
         var name = $('input[name="prodName"]').val()
         var status = $('#status').val()
         var category = $('#category').val()
+        var stock = $('#stock').val()
+        var price = $('#price').val()
 
         if($('#prodImg').prop('files')[0] != undefined){
             formData.append('prod_pic', $('#prodImg')[0].files[0])
         }
         formData.append('product_name', name)
-        formData.append('status', status)
+        formData.append('stock', stock)
+        formData.append('price', price)
+        if(stock > 0){
+            formData.append('status', 1)
+        }
+        else{
+            formData.append('status', 2)
+        }
         formData.append('category', category)
-
-        let temp =""
 
         $.ajax({
             type: "PUT",
@@ -255,30 +308,250 @@ const prodID = pathname.split('/')[2]
         })
     })
 
+    var cartObj
+    var current_cart
+    var total_qty
     //Add to cart
     $("form#addToCart").submit(function(event){
         event.preventDefault()
         var qty = $("#quantity").val();
+        
+        if(parseInt(qty) <= parseInt(avail_stock)){
 
-        $.ajax({
-            type:'POST',
+            $.ajax({
+            type: 'GET',
             url: "cart/cartAPI/",
-            data:{
-                'product': parseInt(prodID),
-                'quantity': qty
+            success: function(data){
+                $.each(data, function(i,cart){
+                    cartObj = cart.id
+                    if(prodID === cart.product.toString()){
+                        total_qty = parseInt(cart.quantity) + parseInt(qty)
+                        if(cart.added_by == "{{request.user.id}}"){
+
+                            current_cart = cart.id
+                            if(qty > 0 && qty <= avail_stock){
+                                
+                                $.ajax({
+                                    type: 'PUT',
+                                    url: "cart/cart-detail-api/" + cart.id + "/",
+                                    data:{
+                                        'quantity': total_qty
+                                    },
+                                    beforeSend: function(xhr){
+                                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                    },
+                                    success:function(){
+                                        alert("added to cart")
+
+                                        //update stock
+                                        $.ajax({
+                                            type: "PATCH",
+                                            url: "product-detail/" + prodID + "/",
+                                            data:{
+                                                'stock': parseInt(avail_stock) - parseInt(qty)
+                                            },
+                                            beforeSend: function(xhr){
+                                                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                            },
+                                            success:function(){
+                                                console.log("Stock updated")
+                                                window.location.href = "cart/cart-page/"
+                                            },
+                                            error:function(error){
+                                                console.log(error)
+                                            }
+                                        })
+                                        
+                                    }
+                                })
+
+                            }
+                            else{
+                                $('#qtyError').show()
+                                $("#qtyError").html("Requires quantity greater than 0 and less than or equal to the available stock")
+                            }
+
+                        }
+                        else if(cart.added_by != "{{request.user.id}}" && current_cart === undefined){
+                            if(qty > 0 && qty <= avail_stock){
+
+                                $.ajax({
+                                    type:'POST',
+                                    url: "cart/cartAPI/",
+                                    data:{
+                                        'product': parseInt(prodID),
+                                        'quantity': qty
+                                    },
+                                    beforeSend: function(xhr){
+                                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                    },
+                                    success:function(){
+                                        alert("added to cart")
+
+                                        //update stock
+                                        $.ajax({
+                                            type: "PATCH",
+                                            url: "product-detail/" + prodID + "/",
+                                            data:{
+                                                'stock': parseInt(avail_stock) - parseInt(qty)
+                                            },
+                                            beforeSend: function(xhr){
+                                                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                            },
+                                            success:function(){
+                                                console.log("Stock updated")
+                                                window.location.href = "cart/cart-page/"
+                                            },
+                                            error:function(error){
+                                                console.log(error)
+                                                $('#nameError').show()
+                                                $("#nameError").html("Product name required")
+                                            }
+                                        })
+
+                                    },
+                                    error:function(error){
+                                        console.log(error)
+                                        $('#qtyError').show()
+                                        $("#qtyError").html("Requires quantity greater than 0")
+                                    }
+                                })
+
+                            }
+                            else{
+                                $('#qtyError').show()
+                                $("#qtyError").html("Requires quantity greater than 0 and less than or equal to the available stock 1")
+                            }
+
+                        }
+
+                    }
+
+                    else{
+                        $.ajax({
+                            type:'POST',
+                            url: "cart/cartAPI/",
+                            data:{
+                                'product': parseInt(prodID),
+                                'quantity': qty
+                            },
+                            beforeSend: function(xhr){
+                                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                            },
+                            success:function(){
+                                alert("added to cart")
+
+                                //update stock
+                                $.ajax({
+                                    type: "PATCH",
+                                    url: "product-detail/" + prodID + "/",
+                                    data:{
+                                        'stock': parseInt(avail_stock) - parseInt(qty)
+                                    },
+                                    beforeSend: function(xhr){
+                                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                    },
+                                    success:function(){
+                                        console.log("Stock updated")
+                                        window.location.href = "cart/cart-page/"
+                                    },
+                                    error:function(error){
+                                        console.log(error)
+                                        $('#nameError').show()
+                                        $("#nameError").html("Product name required")
+                                    }
+
+                                })
+
+                            },
+                            error:function(error){
+                                console.log(error)
+                                $('#qtyError').show()
+                                $("#qtyError").html("Requires quantity greater than 0")
+                            }
+                        })
+                    }
+                    
+                })
+
+                if(cartObj === undefined){
+                    $.ajax({
+                        type:'POST',
+                        url: "cart/cartAPI/",
+                        data:{
+                            'product': parseInt(prodID),
+                            'quantity': qty
+                        },
+                        beforeSend: function(xhr){
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        },
+                        success:function(){
+                            alert("added to cart")
+                            //update stock
+                            $.ajax({
+                                type: "PATCH",
+                                url: "product-detail/" + prodID + "/",
+                                data:{
+                                    'stock': parseInt(avail_stock) - parseInt(qty)
+                                },
+                                beforeSend: function(xhr){
+                                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                },
+                                success:function(){
+                                    console.log("Stock updated")
+                                    window.location.href = "cart/cart-page/"
+                                },
+                                error:function(error){
+                                    console.log(error)
+                                    $('#nameError').show()
+                                    $("#nameError").html("Product name required")
+                                }
+                            })
+
+                        },
+                        error:function(error){
+                            console.log(error)
+                            $('#qtyError').show()
+                            $("#qtyError").html("Requires quantity greater than 0")
+                        }
+                    })
+                }
             },
-            beforeSend: function(xhr){
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            },
-            success:function(){
-                alert("added to cart")
-            },
-            error:function(error){
-                console.log(error)
-                $('#qtyError').show()
-                $("#qtyError").html("Requires quantity greater than 1")
-            }
+
         })
+
+
+            // console.log(cartObj)
+            // if(cartObj === undefined){
+            //     $.ajax({
+            //         type:'POST',
+            //         url: "cart/cartAPI/",
+            //         data:{
+            //             'product': parseInt(prodID),
+            //             'quantity': qty
+            //         },
+            //         beforeSend: function(xhr){
+            //         xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            //         },
+            //         success:function(){
+            //             alert("added to cart")
+            //         },
+            //         error:function(error){
+            //             console.log(error)
+            //             $('#qtyError').show()
+            //             $("#qtyError").html("Requires quantity greater than 0")
+            //         }
+            //     })
+            // }
+
+        }
+        else{
+            $('#qtyError').show()
+            $("#qtyError").html("Cannot add quantity greater than stock")
+        }
+        
+        
+
     })
 
 </script>

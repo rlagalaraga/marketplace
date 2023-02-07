@@ -21,7 +21,8 @@ urlpatterns = [
     path('product-detail/<int:id>/', api.ProductViewSet.as_view({
         'get': 'get',
         'put': 'put',
-        'post': 'delete'
+        'post': 'delete',
+        'patch': 'patch'
     }), name="product-detail"),
 
     path('product-wishlist/<int:id>/', api.ProductViewSet.as_view({

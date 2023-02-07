@@ -33,3 +33,11 @@ class CartViewSet(viewsets.ViewSet):
         cart = Cart.objects.get(id=self.kwargs['id'])
         serializer = self.serializer_class(cart)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put (self, *args, **kwargs):
+        cart = get_object_or_404(Cart, id=self.kwargs['id'])
+        serializer = self.serializer_class(cart, data=self.request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

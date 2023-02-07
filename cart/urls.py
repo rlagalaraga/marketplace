@@ -14,6 +14,7 @@ urlpatterns = [
 
     path('cart-detail-api/<int:id>/', api.CartViewSet.as_view({
         'post': 'delete',
-        'get': 'get_detail'
+        'get': 'get_detail',
+        'put': 'put'
     }), name="cart-delete"),
 ]

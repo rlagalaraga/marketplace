@@ -55,28 +55,28 @@
             <form id="addProduct" action="" novalidate class="was-validated">
             {% csrf_token %}
             <div class="modal-body">
-
+                    <small id="nameError" class="errMsg"></small>
                     <div class="form-group">
                         <label for="exampleInputEmail1" class="form-label mt-4">Product Name</label>
                         <input type="text" class="form-control" name="prodName" aria-describedby="emailHelp" placeholder="Enter name" required>
-                        <small id="nameError" class="errMsg"></small>
                     </div>
                     <div class="form-group">
-                        <label for="exampleInputPassword1" class="form-label mt-4">Status</label>
-                        <select class="form-select" name="status" id="status">
-                            <option value=1>Available</option>
-                            <option value=2>Out of stock</option>
-                          </select>
-                        <small id="fnameError" class="errMsg"></small>
+                        <label class="form-label mt-4">Stock</label>
+                        <input type="number" min="0" class="form-control" id="stock" value=0 required>
+                        <small id="stckError" class="errMsg"></small>
                     </div>
                     <div class="form-group">
-                        <label for="exampleInputPassword1" class="form-label mt-4">Category</label>
+                        <label class="form-label mt-4">Price</label>
+                        <input type="number" onchange="setTwoNumberDecimal" min="0" class="form-control" id="price" value=0 step=".01" required>
+                        <small id="priceError" class="errMsg"></small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label mt-4">Category</label>
                         <select class="form-select" name="category" id="category">
                             <option value=1>Normies</option>
                             <option value=2>Dark</option>
                             <option value=3>Others</option>
                           </select>
-                        <small id="lnameError" class="errMsg"></small>
                     </div>
                     <div class="form-group">
                         <label for="formFile" class="form-label mt-4">Product Image</label>
@@ -137,6 +137,7 @@ $(document).on("click", "#searchBtn", function(){
             $.each(data, function(i,product){
                 var prodOwner = product.owner.split('/')[0]
                 var ownerID = product.owner.split('/')[1]
+                
                 if(product.product_name.split(' ').join('').toLowerCase() === search || prodOwner.split(' ').join('').toLowerCase() === search || product.category_name.split(' ').join('').toLowerCase() === search){
                     temp += "<div class='col-4'>"
                     temp += "<div class='card border-primary mb-3' style='max-width: 20rem;'>"
@@ -150,7 +151,7 @@ $(document).on("click", "#searchBtn", function(){
                         temp += "<img src='{% get_media_prefix %}defaultProdPic.png' id='prodPic'></img>"
                     }
                     temp += "<a href='users/profile-page/" + ownerID + "/' class='card-link'>Product seller details</a>"
-
+                    temp += "<p><strong> " + product.price + " php</strong></p>"
                     if(product.status === 1){
                         temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + product.status_name + "</p>"
                     }
@@ -183,12 +184,21 @@ $("form#addProduct").submit(function(event){
     var name = $('input[name="prodName"]').val()
     var status = $('#status').val()
     var category = $('#category').val()
+    var stock = $('#stock').val()
+    var price = $('#price').val()
 
     if($('#prodImg').prop('files')[0] != undefined){
         formData.append('prod_pic', $('#prodImg')[0].files[0])
     }
     formData.append('product_name', name)
-    formData.append('status', status)
+    formData.append('stock', stock)
+    formData.append('price', price)
+    if(stock > 0){
+        formData.append('status', 1)
+    }
+    else{
+        formData.append('status', 2)
+    }
     formData.append('category', category)
 
     let temp =""
@@ -205,40 +215,19 @@ $("form#addProduct").submit(function(event){
         success:function(){
             alert("Product Added")
             location.reload(true);
-
-            // temp += "<div class='col-4'>"
-            // temp += "<div class='card border-primary mb-3' style='max-width: 20rem;'>"
-            // temp += "<div class='card-header'>{{ request.user.first_name }} {{ request.user.last_name }}</div>"
-            // temp += "<div class='card-body'>"
-            // temp += "<h4 class='card-title'>" + name +"</h4>"
-
-            // if($('#prodImg').prop('files')[0] != undefined){
-            //     temp += "<img src='" + URL.createObjectURL($('#prodImg').prop('files')[0]) + "' class='img-fluid' id='prodPic'></img>"
-            // }
-            
-            // else{
-            //     temp += "<img src='{% get_media_prefix %}defaultProdPic.png' id='prodPic'></img>"
-            // }
-
-            // temp += "<a href='#' class='card-link'>Product seller details</a>"
-            // if($("#status").val() == 1){
-            //     temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + $("#status option:selected").text() + "</p>"
-            // }
-            // else if($("#status").val() == 2){
-            //     temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + $("#status option:selected").text() + "</p>"
-            // }
-            // temp += "<p><strong>Status: </strong>" + $("#category option:selected").text() + "</p>"
-            // temp += "</div><div class='card-footer'>"
-            // temp += "<a href='/product-view/" + product.id + "/' class='btn btn-outline-dark' data-mdb-ripple-color='dark' style='z-index: 1;'>Details</a></div></div></div>"
-            // $("#prodContainer").append(temp);
         },
         error:function(error){
             console.log(error)
             $('#nameError').show()
-            $("#nameError").html("Product name required")
+            $("#nameError").html("All fields must have valid value.")
         }
     })
 })
+
+//Validate Price format
+function setTwoNumberDecimal(event) {
+    this.value = parseFloat(this.value).toFixed(2);
+}
 
 </script>
 {% endblock %}

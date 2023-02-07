@@ -7,6 +7,27 @@
 <div class="container">
 </div>
 
+<!-- Checkout modal -->
+<div class="modal" id="checkOutModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Checkout</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <center><h5>Please confirm checkout</h5></center>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary"  id='checkOut'>Confirm</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 {% endblock %}
 {% block extra_js %}
 
@@ -31,6 +52,9 @@
 
     var pathname = window.location.pathname;
     const cartID = pathname.split('/')[3]
+    var prodID
+    var qty
+    var avail_stock
 
     //get product in cart
     $(document).ready(function(){
@@ -52,6 +76,10 @@
                         if(prod){
                             var prodOwner = prod.data.owner.split('/')[0]
                             var ownerID = prod.data.owner.split('/')[1]
+                            var total_price = prod.data.price * parseFloat(data.quantity).toFixed(2)
+                            prodID = prod.data.id
+                            qty = data.quantity
+                            avail_stock = prod.data.stock
                             console.log("{{user.id}}")
                             console.log(data.added_by.toString())
                             temp += "<div class='card mb-3'>"
@@ -69,19 +97,12 @@
                             temp += "<div class='card-body'>"
                             temp += "<p><strong style='color:grey;'>Date Added: </strong>" + data.date_added.split('T')[0] + "</p>"
                             temp += "<p><strong style='color:grey;'>Qty: </strong>" + data.quantity + "</p>"
-
-                            if(prod.data.status === 1){
-                                temp += "<p style='color:green;'><strong style='color:grey;'>Status: </strong>" + prod.data.status_name + "</p>"
-                            }
-                            else if(prod.data.status === 2){
-                                temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + prod.data.status_name + "</p>"
-                            }
-                            
                             temp += "<p><strong>Category: </strong>" + prod.data.category_name + "</p>"
+                            temp += "<p><strong style='color:grey;'>Total Price: </strong>" + total_price + "php</p>"
                             temp += "<div class='card-footer text-muted'>"
 
                             if("{{user.id}}" === data.added_by.toString()){
-                                temp += "<button class='btn btn-outline-primary' id='checkOut' style='margin-right: 5px;'>Check out</button>"
+                                temp += "<button class='btn btn-outline-primary' data-bs-toggle='modal' data-bs-target='#checkOutModal' style='margin-right: 5px;'>Check out</button>"
                                 temp += "<button class='btn btn-outline-danger' id='delete' style='margin-right: 5px;'>Remove</button>"
                             }
                             temp += "</div></div>"
@@ -91,6 +112,7 @@
                         //Check Out product
                         $(document).on("click", "#checkOut", function(){
                             console.log(prod.prod_pic)
+
                             $.ajax({
                                 type: "POST",
                                 url: "transaction/transact/",
@@ -115,13 +137,18 @@
                                         xhr.setRequestHeader("X-CSRFToken", csrftoken);
                                         },
                                         success:function(){
+                                            console.log("deleted from cart")
                                             window.location.href = "transaction/buyer/"
                                         }
                                     })
 
+                                    
+
                                 }
                             })
-                        }); 
+
+                        });
+
                     }
                 })
             } 
@@ -138,7 +165,29 @@
             },
             success:function(){
                 alert("Removed");
-                window.location.href = "dashboard/"
+
+                //update stock
+                $.ajax({
+                    type: "PATCH",
+                    url: "product-detail/" + prodID + "/",
+                    data:{
+                        'stock': parseInt(avail_stock) + parseInt(qty)
+                    },
+                    beforeSend: function(xhr){
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    },
+                    success:function(){
+                        console.log("Stock updated")
+                        window.location.href = "cart/cart-page/"
+                    },
+                    error:function(error){
+                        console.log(error)
+                        $('#nameError').show()
+                        $("#nameError").html("Product name required")
+                    }
+                })
+
+                window.location.href = "cart/cart-page/"
             }
         })
     }); 

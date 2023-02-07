@@ -44,6 +44,22 @@
                                     var prodOwner = product.data.owner.split('/')[0]
                                     var ownerID = product.data.owner.split('/')[1]
 
+                                    // if(cart.quantity > product.data.stock){
+                                    //     //Delete from cart
+                                    //     $.ajax({
+                                    //         type: "POST",
+                                    //         url: "cart/cart-detail-api/" + cart.id + "/",
+                                    //         beforeSend: function(xhr){
+                                    //         xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                    //         },
+                                    //         success:function(){
+                                    //             alert("Removed");
+                                    //             window.location.href = "cart/cart-page/"
+                                    //         }
+                                    //     })
+
+                                    // }
+
                                     console.log(product.data.product_name)
                                     temp += "<div class='col-4'>"
                                     temp += "<div class='card mb-3'>"
@@ -70,9 +86,9 @@
                                     
                                     temp += "<p><strong>Category: </strong>" + product.data.category_name + "</p>"
                                     temp += "<div class='card-footer text-muted'>"
-                                    if(product.data.status === 1){
-                                        temp += "<a href='/cart/cart-detail/" + cart.id + "' class='btn btn-outline-dark' style='margin-right: 5px;'>Details</a>"
-                                    }
+  
+                                    temp += "<a href='/cart/cart-detail/" + cart.id + "' class='btn btn-outline-dark' style='margin-right: 5px;'>Details</a>"
+                                    
 
                                     temp += "</div></div></div>"
                                     $("#prodContainer").append(temp);

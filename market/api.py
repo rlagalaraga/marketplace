@@ -10,7 +10,7 @@ from .models import Product
 
 class ProductViewSet(viewsets.ViewSet):
 
-    permission_classes = (custom_permissions.IsOwnerOfObject,permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (custom_permissions.IsOwnerOfObject, permissions.IsAuthenticatedOrReadOnly,)
     serializer_class = serializers.ProductSerializer
 
     def get_all(self, *args, **kwargs):
@@ -58,7 +58,14 @@ class ProductViewSet(viewsets.ViewSet):
         
         if product.wishlist.filter(id = self.request.user.id).exists():
             product.wishlist.remove(self.request.user)
-
         else:
             product.wishlist.add(self.request.user)
         return Response({}, status=status.HTTP_200_OK)
+
+    def patch (self, *args, **kwargs):
+        product = get_object_or_404(Product, id=self.kwargs['id'])
+        serializer = self.serializer_class(product, data=self.request.data, partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

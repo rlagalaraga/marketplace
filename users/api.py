@@ -19,14 +19,6 @@ class RegisterViewSet(ViewSet):
         password = make_password(self.request.POST['password'])
         if serializer.is_valid(raise_exception=True):
             serializer.save(password=password)
-            # user = User.objects.create(
-            #     email=serializer.validated_data['email'],
-            #     first_name=serializer.validated_data['first_name'],
-            #     last_name=serializer.validated_data['last_name']
-            # )
-
-            # user.set_password(serializer.validated_data['password'])
-            # user.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -51,6 +43,7 @@ class LoginViewSet(ViewSet):
 class UserViewSet(ViewSet):
     permission_classes = (custom_permissions.IsOwnerOfObject,permissions.IsAuthenticatedOrReadOnly,)
     serializer_class = serializers.UserSerializer
+    
     def get(self, *args, **kwargs):
         users = User.objects.get(id=self.kwargs['id'])
         serializer = self.serializer_class(users)

@@ -8,7 +8,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'product_name', 'status', 'category', 'prod_pic', 'owner', 'status_name', 'category_name']
+        fields = ['id', 'product_name', 'status', 'category', 'prod_pic', 'owner', 'status_name', 'category_name', 'price', 'stock']
         read_only_fields = ['status_name', 'category_name']
 
     def to_representation(self, instance):
