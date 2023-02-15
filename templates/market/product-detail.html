@@ -171,7 +171,7 @@ var avail_stock
                         },
                         success:function(){
                             console.log("Stock updated")
-                            window.location.href = "cart/cart-page/"
+                            location.reload(true);
                         },
                         error:function(error){
                             console.log(error)
@@ -191,7 +191,7 @@ var avail_stock
                         },
                         success:function(){
                             console.log("Stock updated")
-                            window.location.href = "cart/cart-page/"
+                            location.reload(true);
                         },
                         error:function(error){
                             console.log(error)
@@ -202,23 +202,29 @@ var avail_stock
 
                 temp += "<p><strong>Category: </strong>" + data.data.category_name + "</p>"
                 temp += "<div class='card-footer text-muted'>"
+                
+                console.log("{{ user.is_authenticated }}")
+                if("{{ user.is_authenticated }}" === "True"){
 
-                if(current_user === prodOwner){
+                    if(current_user === prodOwner){
                     temp += "<a href='' class='btn btn-outline-primary' data-bs-toggle='modal' data-bs-target='#formModal' style='margin-right: 5px;'>Edit</a>"
                     temp += "<button class='btn btn-outline-danger' id='delete' style='margin-right: 5px;'>Delete</button>"
-                }
-                else{
-                    if(data.data.status === 1){
-                        temp += "<button class='btn btn-outline-dark' data-bs-toggle='modal' data-bs-target='#formModalAdd' style='margin-right: 5px;'>Add to cart</button>"
-                    }
-
-                    if(wish == true){
-                        temp += "<button id='wishlistBtn' class='btn btn-outline-warning' style='margin-right: 5px;'>Remove Wishlist</button>"
                     }
                     else{
-                        temp += "<button id='wishlistBtn' class='btn btn-outline-warning' style='margin-right: 5px;'>Wishlist</button>"
+                        if(data.data.status === 1){
+                            temp += "<button class='btn btn-outline-dark' data-bs-toggle='modal' data-bs-target='#formModalAdd' style='margin-right: 5px;'>Add to cart</button>"
+                        }
+
+                        if(wish == true){
+                            temp += "<button id='wishlistBtn' class='btn btn-outline-warning' style='margin-right: 5px;'>Remove Wishlist</button>"
+                        }
+                        else{
+                            temp += "<button id='wishlistBtn' class='btn btn-outline-warning' style='margin-right: 5px;'>Wishlist</button>"
+                        }
                     }
+
                 }
+                
 
                 temp += "</div></div>"
                 $(".container").append(temp);
@@ -303,10 +309,11 @@ var avail_stock
             error:function(error){
                 console.log(error)
                 $('#nameError').show()
-                $("#nameError").html("Product name required")
+                $("#nameError").html("Invalid Input")
             }
         })
     })
+
 
     var cartObj
     var current_cart
@@ -316,7 +323,7 @@ var avail_stock
         event.preventDefault()
         var qty = $("#quantity").val();
         
-        if(parseInt(qty) <= parseInt(avail_stock)){
+        if(qty <= avail_stock){
 
             $.ajax({
             type: 'GET',
@@ -404,8 +411,6 @@ var avail_stock
                                             },
                                             error:function(error){
                                                 console.log(error)
-                                                $('#nameError').show()
-                                                $("#nameError").html("Product name required")
                                             }
                                         })
 
@@ -457,8 +462,6 @@ var avail_stock
                                     },
                                     error:function(error){
                                         console.log(error)
-                                        $('#nameError').show()
-                                        $("#nameError").html("Product name required")
                                     }
 
                                 })
@@ -520,34 +523,10 @@ var avail_stock
 
         })
 
-
-            // console.log(cartObj)
-            // if(cartObj === undefined){
-            //     $.ajax({
-            //         type:'POST',
-            //         url: "cart/cartAPI/",
-            //         data:{
-            //             'product': parseInt(prodID),
-            //             'quantity': qty
-            //         },
-            //         beforeSend: function(xhr){
-            //         xhr.setRequestHeader("X-CSRFToken", csrftoken);
-            //         },
-            //         success:function(){
-            //             alert("added to cart")
-            //         },
-            //         error:function(error){
-            //             console.log(error)
-            //             $('#qtyError').show()
-            //             $("#qtyError").html("Requires quantity greater than 0")
-            //         }
-            //     })
-            // }
-
         }
         else{
             $('#qtyError').show()
-            $("#qtyError").html("Cannot add quantity greater than stock")
+            $("#qtyError").html("Invalid quantity")
         }
         
         

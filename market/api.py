@@ -48,12 +48,11 @@ class ProductViewSet(viewsets.ViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, *args, **kwargs):
-        product = get_object_or_404(id=self.kwargs['id'])
+        product = get_object_or_404(Product ,id=self.kwargs['id'])
         product.delete()
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
     def wishlist_product(self, *args, **kwargs):
-        #import pdb; pdb.set_trace()
         product = Product.objects.get(id=self.kwargs.get("id"))
         
         if product.wishlist.filter(id = self.request.user.id).exists():

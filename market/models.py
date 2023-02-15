@@ -16,4 +16,5 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(validators=[MinValueValidator(0)], default=0)
 
     def __str__(self):
-        return self.product_name
+        label = self.product_name + " (" + str(self.pk) + ")"
+        return label

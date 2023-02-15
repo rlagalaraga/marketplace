@@ -13,7 +13,8 @@
   <!-- Bootstrap core CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.2.3/dist/lux/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
-  {% block extra_css %}{% endblock %}
+  {% block extra_css %}
+  {% endblock %}
 
   <!-- Custom styles for this template -->
   <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
@@ -83,22 +84,6 @@
     <script src="https://kit.fontawesome.com/c1cb195988.js" crossorigin="anonymous"></script>
 
 {% block extra_js %}
-<script>
-//   $("form#searchForm").submit(function(event){
-//     event.preventDefault()
-
-//     var search = $("#searchID").val()
-//     console.log(search)
-//     let temp = ""
-//     // $.ajax({
-//     //     type:"GET",
-//     //     url:"/list/",
-//     //     success: function(data){
-
-//     //     }
-//     // })
-// })
-</script>
 {% endblock %}
 </body>
 </html>

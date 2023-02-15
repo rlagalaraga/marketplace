@@ -22,7 +22,7 @@ urlpatterns = [
         'get': 'get',
         'put': 'put',
         'post': 'delete',
-        'patch': 'patch'
+        'patch': 'patch',
     }), name="product-detail"),
 
     path('product-wishlist/<int:id>/', api.ProductViewSet.as_view({

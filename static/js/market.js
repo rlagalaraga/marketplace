@@ -1,3 +1,21 @@
+// JavaScript function to get cookie by name
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
 //Get all products
 
 $(document).ready(function(){
@@ -31,6 +49,48 @@ $(document).ready(function(){
                 else if(product.status === 2){
                     temp += "<p style='color:red;'><strong style='color:grey;'>Status: </strong>" + product.status_name + "</p>"
                 }
+
+                if(product.stock > 0 && product.status == 2){
+                    //update status
+                    $.ajax({
+                        type: "PATCH",
+                        url: "product-detail/" + product.id + "/",
+                        data:{
+                            'status': 1
+                        },
+                        beforeSend: function(xhr){
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        },
+                        success:function(){
+                            console.log("Stock updated")
+                            location.reload(true);
+                        },
+                        error:function(error){
+                            console.log(error)
+                        }
+                    })
+                }
+                else if(product.stock < 1 && product.status == 1){
+                    //update status
+                    $.ajax({
+                        type: "PATCH",
+                        url: "product-detail/" + product.id + "/",
+                        data:{
+                            'status': 2
+                        },
+                        beforeSend: function(xhr){
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        },
+                        success:function(){
+                            console.log("Stock updated")
+                            location.reload(true);
+                        },
+                        error:function(error){
+                            console.log(error)
+                        }
+                    })
+                }
+
                 temp += "<p><strong>Category: </strong>" + product.category_name + "</p>"
                 temp += "</div><div class='card-footer'>"
                 temp += "<a href='/product-view/" + product.id + "/' class='btn btn-outline-dark' data-mdb-ripple-color='dark' style='z-index: 1;'>Details</a></div></div></div>"

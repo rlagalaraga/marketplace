@@ -44,22 +44,6 @@
                                     var prodOwner = product.data.owner.split('/')[0]
                                     var ownerID = product.data.owner.split('/')[1]
 
-                                    // if(cart.quantity > product.data.stock){
-                                    //     //Delete from cart
-                                    //     $.ajax({
-                                    //         type: "POST",
-                                    //         url: "cart/cart-detail-api/" + cart.id + "/",
-                                    //         beforeSend: function(xhr){
-                                    //         xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                                    //         },
-                                    //         success:function(){
-                                    //             alert("Removed");
-                                    //             window.location.href = "cart/cart-page/"
-                                    //         }
-                                    //     })
-
-                                    // }
-
                                     console.log(product.data.product_name)
                                     temp += "<div class='col-4'>"
                                     temp += "<div class='card mb-3'>"

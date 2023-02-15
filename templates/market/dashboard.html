@@ -67,7 +67,7 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label mt-4">Price</label>
-                        <input type="number" onchange="setTwoNumberDecimal" min="0" class="form-control" id="price" value=0 step=".01" required>
+                        <input type="number" onchange="setTwoNumberDecimal" min="1" class="form-control" id="price" value=1 step=".01" required>
                         <small id="priceError" class="errMsg"></small>
                     </div>
                     <div class="form-group">
@@ -102,24 +102,6 @@
 {% block extra_js %}
 <script type="text/javascript" src="{% static 'js/market.js' %}" ></script>
 <script>
-
- // JavaScript function to get cookie by name
- function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-const csrftoken = getCookie('csrftoken');
 
 //search dashboard
 $(document).on("click", "#searchBtn", function(){

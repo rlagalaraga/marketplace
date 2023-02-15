@@ -8,16 +8,16 @@
 
                 {% if user.is_authenticated %}
                 <h4 style="color: white;">Bought products</h4>
-                {% else %}
-                <p style="color: gainsboro;">You are not logged in. You must log in to add products.</p>
-                <a href="{% url 'users:login-page' %}" style="color: aliceblue;">Log In</a>
-                {% endif %}
                 <center>    
                 <div class="input-group mb-3" style="width: 50%;">
                     <input class="form-control" type="text" placeholder="Search" id="searchID">
                     <button class="btn btn-primary" type="button" id="searchBtn">Search</button>
                 </div>
                 </center>
+                {% else %}
+                <p style="color: gainsboro;">You are not logged in. You must log in to view bought products.</p>
+                <a href="{% url 'users:login-page' %}" style="color: aliceblue;">Log In</a>
+                {% endif %}
 
             </div>
         </div>
@@ -118,7 +118,7 @@ $(document).on("click", "#searchBtn", function(){
                                         }
 
                                         temp += "<div class='card-body'>"
-                                        temp += "<p><strong style='color:grey;'>Date Added: </strong>" + prod.date_added.split('T')[0] + "</p>"
+                                        temp += "<p><strong style='color:grey;'>Date Purchased: </strong>" + prod.date_added.split('T')[0] + "</p>"
                                         temp += "<p><strong style='color:grey;'>Qty: </strong>" + prod.quantity + "</p>"
                                         temp += "<div class='card-footer text-muted'>"
 
